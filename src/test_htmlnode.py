@@ -3,8 +3,6 @@ import unittest
 from htmlnode import HTMLNode
 
 class TestHTMLNode(unittest.TestCase):
-
-
         def test_repr_eq(self):
             child_node1 = HTMLNode()
             child_node2 = HTMLNode()
