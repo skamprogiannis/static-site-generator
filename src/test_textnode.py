@@ -1,6 +1,6 @@
 import unittest
 
-from textnode import TextNode, TextType
+from textnode import TextNode, TextType, text_node_to_html_node
 
 
 class TestTextNode(unittest.TestCase):
@@ -37,6 +37,32 @@ class TestTextNode(unittest.TestCase):
 
         self.assertNotEqual(url_image_node, image_node)
         self.assertNotEqual(url_link_node, link_node)
+
+    def test_normal_text(self):
+        node = TextNode("This is a text node", TextType.NORMAL_TEXT)
+        html_node = text_node_to_html_node(node)
+        self.assertEqual(html_node.tag, None)
+        self.assertEqual(html_node.value, "This is a text node")
+    
+    def test_bold_text(self):
+        pass
+
+    def test_italic_text(self):
+        pass
+
+    def test_code_text(self):
+        pass
+
+    def test_link_text(self):
+        pass
+
+    def test_image_text(self):
+        node = TextNode("This is an image node", TextType.IMAGE_TEXT, "https://avatars.githubusercontent.com/u/48423146?s=96&v=4")
+        html_node = text_node_to_html_node(node)
+        self.assertEqual(html_node.tag, "img")
+        self.assertEqual(html_node.value, "")
+        self.assertEqual(html_node.props["src"], "https://avatars.githubusercontent.com/u/48423146?s=96&v=4")
+        self.assertEqual(html_node.props["alt"], node.text)
 
 if __name__ == "__main__":
     unittest.main()
