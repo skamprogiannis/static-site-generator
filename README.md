@@ -4,6 +4,8 @@ A dependency-free Python tool that turns a directory of Markdown files into a
 template-driven static website. It includes a small Markdown parser, safe HTML
 rendering, recursive page generation, and a complete example site.
 
+[View the generated example](https://skamprogiannis.github.io/static-site-generator/)
+
 ## Highlights
 
 - Converts headings, paragraphs, quotes, ordered and unordered lists, fenced
