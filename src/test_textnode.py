@@ -45,16 +45,22 @@ class TestTextNode(unittest.TestCase):
         self.assertEqual(html_node.value, "This is a text node")
     
     def test_bold_text(self):
-        pass
+        node = text_node_to_html_node(TextNode("bold", TextType.BOLD_TEXT))
+        self.assertEqual(node.to_html(), "<b>bold</b>")
 
     def test_italic_text(self):
-        pass
+        node = text_node_to_html_node(TextNode("italic", TextType.ITALIC_TEXT))
+        self.assertEqual(node.to_html(), "<i>italic</i>")
 
     def test_code_text(self):
-        pass
+        node = text_node_to_html_node(TextNode("x < y", TextType.CODE_TEXT))
+        self.assertEqual(node.to_html(), "<code>x &lt; y</code>")
 
     def test_link_text(self):
-        pass
+        node = text_node_to_html_node(
+            TextNode("Zone01", TextType.LINK_TEXT, "https://zone01.gr")
+        )
+        self.assertEqual(node.to_html(), '<a href="https://zone01.gr">Zone01</a>')
 
     def test_image_text(self):
         node = TextNode("This is an image node", TextType.IMAGE_TEXT, "https://avatars.githubusercontent.com/u/48423146?s=96&v=4")
@@ -63,6 +69,20 @@ class TestTextNode(unittest.TestCase):
         self.assertEqual(html_node.value, "")
         self.assertEqual(html_node.props["src"], "https://avatars.githubusercontent.com/u/48423146?s=96&v=4") # type: ignore
         self.assertEqual(html_node.props["alt"], node.text) # type: ignore
+
+    def test_rejects_unsafe_link_scheme(self):
+        node = TextNode("click", TextType.LINK_TEXT, "javascript:alert(1)")
+
+        with self.assertRaisesRegex(ValueError, "unsupported URL scheme"):
+            text_node_to_html_node(node)
+
+    def test_allows_relative_image_url(self):
+        node = TextNode("example", TextType.IMAGE_TEXT, "images/example.png")
+
+        self.assertEqual(
+            text_node_to_html_node(node).to_html(),
+            '<img src="images/example.png" alt="example">',
+        )
 
     def test_delim_code(self):
         node = TextNode("This is text with a `code block` word", TextType.NORMAL_TEXT)

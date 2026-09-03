@@ -1,4 +1,5 @@
 from enum import Enum
+from urllib.parse import urlsplit
 
 from leafnode import LeafNode
 from utils import extract_markdown_images, extract_markdown_links
@@ -31,6 +32,23 @@ class TextNode:
         return f"TextNode({self.text}, {self.text_type.value}, {self.url})"
 
 
+def _validated_url(text_node):
+    if text_node.url is None:
+        raise ValueError(f"a {text_node.text_type.value} node must have a URL")
+    if text_node.url != text_node.url.strip() or any(
+        character.isspace() for character in text_node.url
+    ):
+        raise ValueError("Markdown URLs cannot contain whitespace")
+
+    scheme = urlsplit(text_node.url).scheme.lower()
+    allowed_schemes = {"http", "https"}
+    if text_node.text_type == TextType.LINK_TEXT:
+        allowed_schemes.add("mailto")
+    if scheme and scheme not in allowed_schemes:
+        raise ValueError(f"unsupported URL scheme: {scheme}")
+    return text_node.url
+
+
 def text_node_to_html_node(text_node):
     match text_node.text_type:
         case TextType.NORMAL_TEXT:
@@ -42,13 +60,13 @@ def text_node_to_html_node(text_node):
         case TextType.CODE_TEXT:
             return LeafNode("code", text_node.text)
         case TextType.LINK_TEXT:
-            if text_node.url is None:
-                raise ValueError("a link node must have a URL")
-            return LeafNode("a", text_node.text, {"href": text_node.url})
+            return LeafNode("a", text_node.text, {"href": _validated_url(text_node)})
         case TextType.IMAGE_TEXT:
-            if text_node.url is None:
-                raise ValueError("an image node must have a URL")
-            return LeafNode("img", "", {"src": text_node.url, "alt": text_node.text})
+            return LeafNode(
+                "img",
+                "",
+                {"src": _validated_url(text_node), "alt": text_node.text},
+            )
         case _:
             raise ValueError("text_node does not have a valid type")
 
