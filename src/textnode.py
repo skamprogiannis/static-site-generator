@@ -81,7 +81,7 @@ def split_nodes_delimiter(old_nodes, delimiter, text_type):
         if old_node.text_type != TextType.NORMAL_TEXT:
             new_nodes.append(old_node)
             continue
-        
+
         delimiter_count = old_node.text.count(delimiter)
         if delimiter_count % 2 != 0:
             raise ValueError("invalid Markdown syntax: missing closing delimiter")
@@ -90,7 +90,7 @@ def split_nodes_delimiter(old_nodes, delimiter, text_type):
         for i, text_chunk in enumerate(split_text):
             if text_chunk == "":
                 continue
-            
+
             if i % 2 == 1:
                 new_node = TextNode(text_chunk, text_type)
                 new_nodes.append(new_node)
@@ -124,7 +124,7 @@ def split_nodes_image(old_nodes):
 
             original_text = sections[1]
             new_nodes.append(TextNode(alt_text, TextType.IMAGE_TEXT, url))
-        
+
         if original_text != "":
             new_nodes.append(TextNode(original_text, TextType.NORMAL_TEXT))
 

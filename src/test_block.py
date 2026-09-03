@@ -1,5 +1,7 @@
 import unittest
-from block import *
+
+from block import BlockType, block_to_block_type, markdown_to_blocks
+
 
 class TestMarkdownToBlocks(unittest.TestCase):
     def test_markdown_to_blocks(self):
@@ -33,32 +35,73 @@ This is the same paragraph on a new line
         self.assertEqual(blocks, ["Block 1", "Block 2"])
 
     def test_block_to_block_type_paragraph(self):
-        self.assertEqual(block_to_block_type("This is lowly paragraph block"), BlockType.PARAGRAPH)
-        self.assertNotEqual(block_to_block_type("- This is not a paragraph block"), BlockType.PARAGRAPH)
+        self.assertEqual(
+            block_to_block_type("This is lowly paragraph block"), BlockType.PARAGRAPH
+        )
+        self.assertNotEqual(
+            block_to_block_type("- This is not a paragraph block"), BlockType.PARAGRAPH
+        )
 
     def test_block_to_block_type_heading(self):
-        self.assertEqual(block_to_block_type("# This is a heading block"), BlockType.HEADING)
-        self.assertEqual(block_to_block_type("##### This is also a heading block"), BlockType.HEADING)
-        self.assertNotEqual(block_to_block_type("This is not a heading block"), BlockType.HEADING)
-        self.assertNotEqual(block_to_block_type("####### This is not a heading block either, 7 hashtags? Who does that?"), BlockType.HEADING)
+        self.assertEqual(
+            block_to_block_type("# This is a heading block"), BlockType.HEADING
+        )
+        self.assertEqual(
+            block_to_block_type("##### This is also a heading block"), BlockType.HEADING
+        )
+        self.assertNotEqual(
+            block_to_block_type("This is not a heading block"), BlockType.HEADING
+        )
+        self.assertNotEqual(
+            block_to_block_type(
+                "####### This is not a heading block either, 7 hashtags? Who does that?"
+            ),
+            BlockType.HEADING,
+        )
 
     def test_block_to_block_type_code(self):
-        self.assertEqual(block_to_block_type("```This is a code block```"), BlockType.CODE)
-        self.assertNotEqual(block_to_block_type("``This is not a code block``"), BlockType.CODE)
+        self.assertEqual(
+            block_to_block_type("```This is a code block```"), BlockType.CODE
+        )
+        self.assertNotEqual(
+            block_to_block_type("``This is not a code block``"), BlockType.CODE
+        )
 
     def test_block_to_block_type_quote(self):
-        self.assertEqual(block_to_block_type("> This is a quote block"), BlockType.QUOTE)
-        self.assertNotEqual(block_to_block_type("< This is not a quote block``"), BlockType.QUOTE)
+        self.assertEqual(
+            block_to_block_type("> This is a quote block"), BlockType.QUOTE
+        )
+        self.assertNotEqual(
+            block_to_block_type("< This is not a quote block``"), BlockType.QUOTE
+        )
 
     def test_block_to_block_type_unordered(self):
-        self.assertEqual(block_to_block_type("- This is an unordered\n- list block"), BlockType.UNORDERED_LIST)
-        self.assertNotEqual(block_to_block_type("!This is not an unordered\n!-list block"), BlockType.UNORDERED_LIST)
-        self.assertNotEqual(block_to_block_type("-This is not an unordered\n-list block either"), BlockType.UNORDERED_LIST)
+        self.assertEqual(
+            block_to_block_type("- This is an unordered\n- list block"),
+            BlockType.UNORDERED_LIST,
+        )
+        self.assertNotEqual(
+            block_to_block_type("!This is not an unordered\n!-list block"),
+            BlockType.UNORDERED_LIST,
+        )
+        self.assertNotEqual(
+            block_to_block_type("-This is not an unordered\n-list block either"),
+            BlockType.UNORDERED_LIST,
+        )
 
     def test_block_to_block_type_ordered(self):
-        self.assertEqual(block_to_block_type("1. First point \n2. Second point\n3. Third point"), BlockType.ORDERED_LIST)
-        self.assertNotEqual(block_to_block_type("1. First point\n3. Third point"), BlockType.ORDERED_LIST)
-        self.assertNotEqual(block_to_block_type("1! First point\n2! Second point"), BlockType.ORDERED_LIST)
+        self.assertEqual(
+            block_to_block_type("1. First point \n2. Second point\n3. Third point"),
+            BlockType.ORDERED_LIST,
+        )
+        self.assertNotEqual(
+            block_to_block_type("1. First point\n3. Third point"),
+            BlockType.ORDERED_LIST,
+        )
+        self.assertNotEqual(
+            block_to_block_type("1! First point\n2! Second point"),
+            BlockType.ORDERED_LIST,
+        )
 
 
 if __name__ == "__main__":

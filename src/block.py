@@ -40,7 +40,7 @@ def block_to_block_type(markdown_block):
             is_quote = False
         if not line.startswith("- "):
             is_unordered_list = False
-        if not line.startswith(f"{i+1}. "):
+        if not line.startswith(f"{i + 1}. "):
             is_ordered_list = False
 
     if is_quote:

@@ -53,7 +53,11 @@ def _validate_paths(content_dir, static_dir, output_dir):
     static = static_dir.resolve()
     output = output_dir.resolve()
 
-    if output in (content, static) or output in content.parents or output in static.parents:
+    if (
+        output in (content, static)
+        or output in content.parents
+        or output in static.parents
+    ):
         raise ValueError("output directory must not contain the source directories")
     if content in output.parents or static in output.parents:
         raise ValueError("output directory must not be inside a source directory")
