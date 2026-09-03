@@ -1,7 +1,8 @@
 from enum import Enum
 
 from leafnode import LeafNode
-from utils import *
+from utils import extract_markdown_images, extract_markdown_links
+
 
 class TextType(Enum):
     NORMAL_TEXT = "text"
@@ -11,19 +12,21 @@ class TextType(Enum):
     LINK_TEXT = "link"
     IMAGE_TEXT = "image"
 
-class TextNode():
-    def __init__(self, text, text_type, url = None):
+
+class TextNode:
+    def __init__(self, text, text_type, url=None):
         self.text = text
         self.text_type = text_type
         self.url = url
 
     def __eq__(self, other):
         return (
-            self.text == other.text and
-            self.text_type == other.text_type and
-            self.url == other.url
+            isinstance(other, TextNode)
+            and self.text == other.text
+            and self.text_type == other.text_type
+            and self.url == other.url
         )
-    
+
     def __repr__(self):
         return f"TextNode({self.text}, {self.text_type.value}, {self.url})"
 
@@ -39,13 +42,21 @@ def text_node_to_html_node(text_node):
         case TextType.CODE_TEXT:
             return LeafNode("code", text_node.text)
         case TextType.LINK_TEXT:
+            if text_node.url is None:
+                raise ValueError("a link node must have a URL")
             return LeafNode("a", text_node.text, {"href": text_node.url})
         case TextType.IMAGE_TEXT:
+            if text_node.url is None:
+                raise ValueError("an image node must have a URL")
             return LeafNode("img", "", {"src": text_node.url, "alt": text_node.text})
         case _:
-            raise Exception("text_node does not have a valid type")
-        
+            raise ValueError("text_node does not have a valid type")
+
+
 def split_nodes_delimiter(old_nodes, delimiter, text_type):
+    if delimiter == "":
+        raise ValueError("delimiter cannot be empty")
+
     new_nodes = []
 
     for old_node in old_nodes:
@@ -53,14 +64,10 @@ def split_nodes_delimiter(old_nodes, delimiter, text_type):
             new_nodes.append(old_node)
             continue
         
-        delimiter_count = 0
-        for char in old_node.text:
-            if char == delimiter:
-                delimiter_count += 1
+        delimiter_count = old_node.text.count(delimiter)
         if delimiter_count % 2 != 0:
-            raise Exception("invalid Markdown syntax: missing closing delimiter")
+            raise ValueError("invalid Markdown syntax: missing closing delimiter")
 
-        
         split_text = old_node.text.split(delimiter)
         for i, text_chunk in enumerate(split_text):
             if text_chunk == "":
@@ -72,8 +79,9 @@ def split_nodes_delimiter(old_nodes, delimiter, text_type):
             else:
                 new_node = TextNode(text_chunk, TextType.NORMAL_TEXT)
                 new_nodes.append(new_node)
-        
+
     return new_nodes
+
 
 def split_nodes_image(old_nodes):
     new_nodes = []
@@ -82,8 +90,7 @@ def split_nodes_image(old_nodes):
         if old_node.text_type != TextType.NORMAL_TEXT:
             new_nodes.append(old_node)
             continue
-    
-        
+
         original_text = old_node.text
         text_url_pairs = extract_markdown_images(old_node.text)
         if len(text_url_pairs) == 0:
@@ -97,13 +104,14 @@ def split_nodes_image(old_nodes):
             if sections[0] != "":
                 new_nodes.append(TextNode(sections[0], TextType.NORMAL_TEXT))
 
-            original_text = ''.join(sections[1:])
+            original_text = sections[1]
             new_nodes.append(TextNode(alt_text, TextType.IMAGE_TEXT, url))
         
         if original_text != "":
             new_nodes.append(TextNode(original_text, TextType.NORMAL_TEXT))
 
     return new_nodes
+
 
 def split_nodes_link(old_nodes):
     new_nodes = []
@@ -112,8 +120,7 @@ def split_nodes_link(old_nodes):
         if old_node.text_type != TextType.NORMAL_TEXT:
             new_nodes.append(old_node)
             continue
-    
-        
+
         original_text = old_node.text
         text_url_pairs = extract_markdown_links(old_node.text)
         if len(text_url_pairs) == 0:
@@ -127,13 +134,14 @@ def split_nodes_link(old_nodes):
             if sections[0] != "":
                 new_nodes.append(TextNode(sections[0], TextType.NORMAL_TEXT))
 
-            original_text = ''.join(sections[1:])
+            original_text = sections[1]
             new_nodes.append(TextNode(link_text, TextType.LINK_TEXT, url))
 
         if original_text != "":
             new_nodes.append(TextNode(original_text, TextType.NORMAL_TEXT))
-        
+
     return new_nodes
+
 
 def text_to_textnodes(text):
     nodes = [TextNode(text, TextType.NORMAL_TEXT)]

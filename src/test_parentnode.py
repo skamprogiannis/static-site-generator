@@ -3,6 +3,7 @@ import unittest
 from leafnode import LeafNode
 from parentnode import ParentNode
 
+
 class TestParentNode(unittest.TestCase):
 
     def test_to_html_with_children(self):
@@ -18,3 +19,8 @@ class TestParentNode(unittest.TestCase):
             parent_node.to_html(),
             "<div><span><b>grandchild</b></span></div>",
     )
+
+    def test_to_html_with_props(self):
+        parent_node = ParentNode("main", [LeafNode("p", "content")], {"id": "page"})
+
+        self.assertEqual(parent_node.to_html(), '<main id="page"><p>content</p></main>')

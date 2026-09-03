@@ -2,6 +2,7 @@ import unittest
 
 from htmlnode import HTMLNode
 
+
 class TestHTMLNode(unittest.TestCase):
         def test_repr_eq(self):
             child_node1 = HTMLNode()
@@ -18,6 +19,19 @@ class TestHTMLNode(unittest.TestCase):
 
             self.assertEqual(a_node.props_to_html(), ' class="reference internal" href="#assert-methods" target="_self"')
             self.assertEqual(span_node.props_to_html(), ' class="std std-ref"')
+
+        def test_props_escape_attribute_values(self):
+            node = HTMLNode("a", "example", props={"title": 'say "hello" & go'})
+
+            self.assertEqual(
+                node.props_to_html(), ' title="say &quot;hello&quot; &amp; go"'
+            )
+
+        def test_props_reject_invalid_attribute_names(self):
+            node = HTMLNode("a", "example", props={'title onclick="alert(1)': "x"})
+
+            with self.assertRaisesRegex(ValueError, "invalid HTML attribute name"):
+                node.props_to_html()
 
         def test_props_uneq(self):
             span_node = HTMLNode("span", "the list of assert methods", None, {"class": "std std-ref"})
